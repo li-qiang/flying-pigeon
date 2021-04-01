@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+require("../dist/code-review/fp-push-trello");
+

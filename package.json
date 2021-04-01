@@ -1,0 +1,33 @@
+{
+  "name": "@qlee/flying-pigeon",
+  "version": "0.1.4",
+  "bin": {
+    "fp": "./bin/fp",
+    "fp-push-code-review": "./bin/fp-push-code-review"
+  },
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w"
+  },
+  "author": "qlee",
+  "license": "ISC",
+  "dependencies": {
+    "@types/ioredis": "^4.22.1",
+    "cacache": "^15.0.6",
+    "file-entry-cache": "^6.0.1",
+    "flat-cache": "^3.0.4",
+    "ioredis": "^4.24.4",
+    "node-cache": "^5.1.2",
+    "node-notifier": "^9.0.1",
+    "trello.js": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/cacache": "^15.0.0",
+    "@types/file-entry-cache": "^5.0.1",
+    "@types/flat-cache": "^2.0.0",
+    "@types/node-notifier": "^8.0.0",
+    "typescript": "^4.2.3"
+  }
+}
