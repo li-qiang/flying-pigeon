@@ -1,6 +1,6 @@
 {
   "name": "@qlee/flying-pigeon",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "bin": {
     "fp": "./bin/fp",
     "fp-push-code-review": "./bin/fp-push-code-review"

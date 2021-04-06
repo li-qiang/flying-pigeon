@@ -1,7 +1,9 @@
 import flatCache = require('flat-cache');
-import {cacheFile} from "./config";
+import {cacheFile, config} from "./config";
+import {Cache} from "flat-cache";
 
-const fileCache = flatCache.load(cacheFile);
+
+const fileCache = config.cached === false ? {} as Cache : flatCache.load(cacheFile);
 
 type CacheValue<T> = {
   expiredAt: number;
@@ -28,6 +30,11 @@ const set = (key: string, value: any, ttl: number) => {
 export const cache = {
 
   async getOrInit<T>(key: string, ttl: number, builder: () => Promise<T> | T) {
+
+    if (config.cached === false) {
+      return builder();
+    }
+
     const value = get(key);
     if (value === undefined) {
       const value = await builder();
@@ -36,8 +43,4 @@ export const cache = {
     }
     return value;
   },
-
-  get,
-
-  set
 };

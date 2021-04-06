@@ -17,6 +17,9 @@ export type Config = {
     key: string,
     token: string
   }
+
+  cacheFile?: string
+  cached?: boolean
 };
 
 
@@ -26,6 +29,6 @@ const configContent = fs.readFileSync(path.join(homedir, '.flying-pigeon.json'))
 
 export const config: Config = JSON.parse(configContent);
 
-export const cacheFile = path.join(os.tmpdir(), 'fp');
+export const cacheFile = config.cacheFile || path.join(os.tmpdir(), 'fp');
 
 
