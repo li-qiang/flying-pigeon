@@ -1,12 +1,17 @@
 {
   "name": "@qlee/flying-pigeon",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "bin": {
     "fp": "./bin/fp",
     "fp-push-code-review": "./bin/fp-push-code-review"
   },
   "description": "",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/li-qiang/flying-pigeon.git"
+  },
+
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc -w"
