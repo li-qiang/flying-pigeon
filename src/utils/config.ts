@@ -10,7 +10,6 @@ export type Config = {
 
   codeReview: {
     idBoard: string
-    idOrganization: string,
   },
 
   trello: {

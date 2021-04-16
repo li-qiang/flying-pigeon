@@ -1,6 +1,6 @@
 import {TrelloClient} from "trello.js";
-import {config} from "../utils/config";
-import {BoardList, Card, SimpleMember} from "../types";
+import {Config, config} from "../utils/config";
+import {BoardList, SimpleMember} from "../types";
 import {cache} from "../utils/cache";
 import process from 'process';
 import path from 'path';
@@ -10,16 +10,14 @@ const [, , ...args] = process.argv;
 
 const [project, file, startLine, endLine, comment, content] = args.join(' ').split(';;;');
 
-const boardId: string = config?.codeReview?.idBoard;
+async function getOrCreateBoardList(trelloClient: TrelloClient, listName: string, idBoard: string): Promise<BoardList> {
 
-async function getOrCreateBoardList(trelloClient: TrelloClient, listName: string): Promise<BoardList> {
-
-  const boardLists: BoardList[] = await trelloClient.boards.getBoardLists({id: boardId});
+  const boardLists: BoardList[] = await trelloClient.boards.getBoardLists({id: idBoard});
 
   const [boardList] = boardLists.filter(l => l.name === listName);
 
   if (!boardList) {
-    return await trelloClient.boards.createBoardList({id: boardId, name: listName, pos: 'top'});
+    return await trelloClient.boards.createBoardList({id: idBoard, name: listName, pos: 'top'});
   }
 
   return boardList;
@@ -38,35 +36,30 @@ function getTodayDate() {
 
 const TTL = 1000 * 60 * 60;
 
-
-async function getMembers(trelloClient: TrelloClient): Promise<SimpleMember[]> {
-  return cache.getOrInit('members', TTL, () => {
-    return trelloClient.organizations.getOrganizationMembers({id: config.codeReview.idOrganization});
+async function getBoardMembers(trelloClient: TrelloClient, idBoard: string): Promise<SimpleMember[]> {
+  return cache.getOrInit(`board/${idBoard}/members`, TTL, () => {
+    return trelloClient.boards.getBoardMembers({id: idBoard});
   });
 }
 
-async function getMember(trelloClient: TrelloClient, fullName: string) {
-  const members = await getMembers(trelloClient);
+async function getBoardMember(trelloClient: TrelloClient, fullName: string, idBoard: string) {
+  const members = await getBoardMembers(trelloClient, idBoard);
   const [member] = members.filter(m => m.fullName === fullName);
   return member;
 }
 
-const upload = async function () {
-
-  const trelloClient = new TrelloClient({key: config.trello.key, token: config.trello.token});
+async function upload(localConfig: Config) {
+  const boardId: string = localConfig?.codeReview?.idBoard;
+  const trelloClient = new TrelloClient({key: config.trello.key, token: localConfig.trello?.token});
   const listName = getTodayDate();
-
-  const boardList = await cache.getOrInit('currentList', TTL, () => getOrCreateBoardList(trelloClient, listName));
-
+  const boardList = await cache.getOrInit(`board/${boardId}/list/${listName}`, TTL, () => getOrCreateBoardList(trelloClient, listName, boardId));
   const [user] = comment.split(' ');
-
-  const member = await getMember(trelloClient, user);
-
+  const member = await getBoardMember(trelloClient, user, localConfig.codeReview?.idBoard);
   if (!member) {
     throw new Error(`Can not find member ${user}`);
   }
 
-  await trelloClient.cards.createCard({
+  return  trelloClient.cards.createCard({
     idList: boardList.id,
     name: comment,
     desc: `
@@ -79,7 +72,7 @@ ${file}:${startLine}-${endLine}
   });
 };
 
-upload().then(() => {
+upload(config).then(() => {
   nodeNotifier.notify({
     title: `Upload success -- ${project}`,
     message: `${comment}`,
